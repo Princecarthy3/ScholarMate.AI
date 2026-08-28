@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // CENTRALIZED BACKEND GEMINI API KEY
 // Paste your single shared Gemini API Key here (or set environment variable GEMINI_API_KEY):
-$BACKEND_GEMINI_API_KEY = getenv('GEMINI_API_KEY') ?: 'AQ.Ab8RN6If5Rk5prL6tSIyvZYFM2_8CkbfLOFsDdK2Nvzl5zgs3A';
+$BACKEND_GEMINI_API_KEY = getenv('GEMINI_API_KEY') ?: 'AQ.Ab8RN6JjfpyDUJWa1gAgGTr7nnfvSc6rE0-Zjm1AYhhEOqQnzw';
 
 $input = json_decode(file_get_contents('php://input'), true);
 $message = $input['message'] ?? '';
