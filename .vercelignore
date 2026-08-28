@@ -1,0 +1,5 @@
+# Exclude local PHP scripts and SQLite files from Vercel Serverless Function build
+api/*.php
+api/*.sqlite
+scholarmate.sql
+supabase_schema.sql

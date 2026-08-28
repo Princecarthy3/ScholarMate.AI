@@ -1,0 +1,13 @@
+# Node & Vercel
+node_modules/
+.vercel/
+.env
+.env.local
+.env*.local
+
+# Database & Scratch
+*.sqlite
+scratch/
+.gemini/
+.idea/
+.vscode/
