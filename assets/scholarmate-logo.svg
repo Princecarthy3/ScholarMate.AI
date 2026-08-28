@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="smGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F2FE" />
+      <stop offset="100%" stop-color="#7928CA" />
+    </linearGradient>
+    <linearGradient id="smCapGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="50%" stop-color="#00F2FE" />
+      <stop offset="100%" stop-color="#C084FC" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Badge -->
+  <rect x="6" y="6" width="88" height="88" rx="24" fill="#09101d" stroke="url(#smGrad)" stroke-width="3" />
+  
+  <!-- Graduation Scholar Cap Top -->
+  <path d="M50 22 L82 37 L50 52 L18 37 Z" fill="url(#smCapGrad)" />
+  
+  <!-- Cap Skullcap -->
+  <path d="M32 45 V57 C32 65 68 65 68 57 V45" fill="none" stroke="url(#smCapGrad)" stroke-width="4.5" stroke-linecap="round" />
+  
+  <!-- Tassel Cord & Drop -->
+  <path d="M79 38 V55 L82 61 L76 61 Z" fill="#F59E0B" />
+  
+  <!-- AI Sparkle Core -->
+  <path d="M50 67 L53 73 L59 76 L53 79 L50 85 L47 79 L41 76 L47 73 Z" fill="#00F2FE" />
+</svg>
