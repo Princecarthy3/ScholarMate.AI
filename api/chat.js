@@ -19,7 +19,7 @@ export default async function handler(req, res) {
         const { message, apiKey: reqApiKey } = req.body || {};
         
         // CENTRALIZED BACKEND GEMINI API KEY
-        const CENTRALIZED_GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AQ.Ab8RN6If5Rk5prL6tSIyvZYFM2_8CkbfLOFsDdK2Nvzl5zgs3A';
+        const CENTRALIZED_GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AQ.Ab8RN6JjfpyDUJWa1gAgGTr7nnfvSc6rE0-Zjm1AYhhEOqQnzw';
 
         const apiKey = CENTRALIZED_GEMINI_API_KEY || reqApiKey || '';
 
