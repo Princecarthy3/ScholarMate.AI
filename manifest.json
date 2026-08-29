@@ -1,0 +1,19 @@
+{
+  "name": "ScholarMate AI - Smart Study Assistant",
+  "short_name": "ScholarMate",
+  "description": "Your intelligent AI study partner for interactive quizzes, 3D flashcards, and active memory retention.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0b101b",
+  "theme_color": "#0b101b",
+  "categories": ["education", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "./assets/scholarmate-logo.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
