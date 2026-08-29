@@ -15,8 +15,7 @@ function getSupabase() {
 
     if (window.supabase && typeof window.supabase.createClient === 'function') {
         try {
-            if (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== 'https://jvaggclfzufzspshwemo.supabase.co') {
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            if (SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_URL.includes('https://jvaggclfzufzspshwemo.supabase.co'))
             }
         } catch (e) {
             console.error('Failed to initialize Supabase client:', e);
