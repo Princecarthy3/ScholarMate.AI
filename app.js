@@ -3661,5 +3661,9 @@ async function init() {
   }
 }
 
-// Launch on DOM Ready
-document.addEventListener('DOMContentLoaded', init);
+// Launch on DOM Ready or Immediately if DOM is already parsed
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
