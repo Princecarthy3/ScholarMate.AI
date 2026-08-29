@@ -3345,6 +3345,177 @@ body.light-theme .mobile-bottom-nav {
   color: var(--cyan-accent);
 }
 
+/* ==========================================================================
+   MOBILE RESPONSIVE LAYOUT & SMART STUDY STYLES (SCREEN <= 768PX)
+   ========================================================================== */
+
+@media screen and (max-width: 768px) {
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100vw !important;
+  }
+
+  .app-shell {
+    grid-template-columns: 1fr !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    min-height: 100vh;
+  }
+
+  .main-stage {
+    padding: 14px 12px 90px !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  .topbar {
+    padding: 12px 14px !important;
+    margin-bottom: 16px !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .topbar-left h1 {
+    font-size: 20px !important;
+  }
+
+  .topbar-right {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  .view-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .view-header > div:last-child {
+    margin-left: 0 !important;
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  /* Smart Study / Tutor View Mobile Responsive Styles */
+  #tutorView, .chat-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .quick-prompts-row {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 8px !important;
+    padding-bottom: 10px !important;
+    margin-bottom: 16px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .quick-prompts-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .prompt-chip {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    font-size: 11.5px !important;
+    padding: 8px 12px !important;
+  }
+
+  .chat-container {
+    padding: 0 !important;
+    border-radius: var(--radius-md) !important;
+  }
+
+  .chat-log {
+    padding: 14px 12px !important;
+    max-height: calc(100vh - 280px) !important;
+  }
+
+  .message {
+    gap: 10px !important;
+  }
+
+  .bubble-content {
+    padding: 12px 14px !important;
+    font-size: 13px !important;
+    max-width: 100% !important;
+  }
+
+  .composer-form {
+    padding: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .textarea-wrapper {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .textarea-wrapper textarea {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    min-height: 48px !important;
+  }
+
+  .composer-actions {
+    justify-content: space-between !important;
+    width: 100% !important;
+  }
+
+  .btn-icon-text {
+    flex: 1 !important;
+  }
+
+  /* Quiz Lab Mobile Responsive Styles */
+  .gen-form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .gen-mode-tabs {
+    flex-wrap: wrap !important;
+  }
+
+  .mode-tab {
+    flex: 1 !important;
+    justify-content: center !important;
+    padding: 8px 14px !important;
+    font-size: 12px !important;
+  }
+
+  /* Hero Banner Mobile */
+  .hero-banner {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 24px 20px !important;
+    gap: 20px !important;
+  }
+
+  .hero-text h2 {
+    font-size: 24px !important;
+  }
+
+  .hero-streak-card {
+    width: 100% !important;
+  }
+}
+
 
 
 
