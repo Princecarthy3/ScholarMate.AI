@@ -40,7 +40,7 @@ function getInitials(name, email) {
 }
 
 const AuthManager = {
-  async getCurrentUser() {
+  async getCurrentUser(targetUser = null) {
     const supabase = window.getSupabase ? window.getSupabase() : null;
     if (!supabase) {
       const email = localStorage.getItem('scholarmate_current_user');
@@ -52,10 +52,13 @@ const AuthManager = {
     }
 
     try {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error || !session || !session.user) return null;
+      let user = targetUser;
+      if (!user) {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error || !session || !session.user) return null;
+        user = session.user;
+      }
 
-      const user = session.user;
       let profile = null;
       try {
         const { data } = await supabase
@@ -3468,28 +3471,35 @@ async function init() {
         return;
       }
       if (session?.user) {
-        const userObj = await AuthManager.getCurrentUser();
+        const userObj = await AuthManager.getCurrentUser(session.user);
         if (userObj) {
           enterApp(userObj);
-          if (window.location.hash && window.location.hash.includes('access_token')) {
+          if (window.location.hash && (window.location.hash.includes('access_token') || window.location.hash.includes('refresh_token'))) {
             history.replaceState(null, document.title, window.location.pathname + window.location.search);
           }
         }
-      } else {
+      } else if (event === 'SIGNED_OUT') {
         currentUser = null;
         $('#authScreen')?.classList.remove('hidden');
         $('#appScreen')?.classList.add('hidden');
       }
     });
 
-    AuthManager.getCurrentUser().then(userObj => {
-      if (userObj) {
-        enterApp(userObj);
-      } else {
-        $('#authScreen')?.classList.remove('hidden');
-        $('#appScreen')?.classList.add('hidden');
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const userObj = await AuthManager.getCurrentUser(session.user);
+        if (userObj) {
+          enterApp(userObj);
+          return;
+        }
       }
-    });
+    } catch (e) {}
+
+    if (!window.location.hash || !window.location.hash.includes('access_token')) {
+      $('#authScreen')?.classList.remove('hidden');
+      $('#appScreen')?.classList.add('hidden');
+    }
   } else {
     AuthManager.getCurrentUser().then(existingUser => {
       if (existingUser) {
