@@ -56,11 +56,17 @@ const AuthManager = {
       if (error || !session || !session.user) return null;
 
       const user = session.user;
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .maybeSingle();
+      let profile = null;
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle();
+        profile = data;
+      } catch (pErr) {
+        console.warn('Profile fetch warning:', pErr);
+      }
 
       const userObj = {
         id: user.id,
@@ -172,10 +178,11 @@ const AuthManager = {
       throw new Error('Supabase client is not configured. Please set your SUPABASE_URL and SUPABASE_ANON_KEY in config.js.');
     }
 
+    const redirectUrl = window.location.origin + window.location.pathname;
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin
+        redirectTo: redirectUrl
       }
     });
 
@@ -3456,6 +3463,9 @@ async function init() {
         const userObj = await AuthManager.getCurrentUser();
         if (userObj) {
           enterApp(userObj);
+          if (window.location.hash && window.location.hash.includes('access_token')) {
+            history.replaceState(null, document.title, window.location.pathname + window.location.search);
+          }
         }
       } else {
         currentUser = null;
