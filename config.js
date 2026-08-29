@@ -15,7 +15,8 @@ function getSupabase() {
 
     if (window.supabase && typeof window.supabase.createClient === 'function') {
         try {
-            if (SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_URL.includes('https://jvaggclfzufzspshwemo.supabase.co'))
+            if (SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_URL.includes('YOUR_SUPABASE')) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             }
         } catch (e) {
             console.error('Failed to initialize Supabase client:', e);
@@ -51,4 +52,3 @@ window.setGeminiApiKey = setGeminiApiKey;
 window.getSupabase = getSupabase;
 window.SUPABASE_URL = SUPABASE_URL;
 window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
-
