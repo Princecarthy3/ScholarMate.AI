@@ -3488,15 +3488,26 @@ function initPreloader() {
 
   if (!preloader) return;
 
-  const durationMs = 3000;
+  let dismissed = false;
+  const dismissPreloader = () => {
+    if (dismissed) return;
+    dismissed = true;
+    preloader.classList.add('fade-out');
+    setTimeout(() => {
+      preloader.style.display = 'none';
+    }, 400);
+  };
+
+  // Failsafe timer: GUARANTEE preloader is removed within 800ms maximum
+  setTimeout(dismissPreloader, 800);
+
+  const durationMs = 600;
   const startTime = Date.now();
 
   const statuses = [
     { at: 0, text: 'Initializing ScholarMate AI Engine...' },
-    { at: 25, text: 'Loading Active Recall Quizzes...' },
-    { at: 55, text: 'Connecting Supabase Workspace...' },
-    { at: 80, text: 'Finalizing Learning Environment...' },
-    { at: 98, text: 'Workspace Ready!' }
+    { at: 30, text: 'Loading Workspace...' },
+    { at: 80, text: 'Workspace Ready!' }
   ];
 
   const timer = setInterval(() => {
@@ -3513,14 +3524,9 @@ function initPreloader() {
 
     if (progress >= 100) {
       clearInterval(timer);
-      setTimeout(() => {
-        preloader.classList.add('fade-out');
-        setTimeout(() => {
-          preloader.style.display = 'none';
-        }, 600);
-      }, 300);
+      dismissPreloader();
     }
-  }, 50);
+  }, 30);
 }
 
 async function init() {
