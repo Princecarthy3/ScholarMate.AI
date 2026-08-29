@@ -3177,38 +3177,54 @@ function setupProfileFlyout() {
   const dropdown = $('#profileDropdown');
   const themeToggle = $('#themeToggle');
 
-  const toggleDropdown = (e) => {
-    if (e) {
-      e.stopPropagation();
+  // Toggle profile flyout dropdown using event delegation
+  document.addEventListener('click', (e) => {
+    const trigger = e.target.closest('#profileFlyoutBtn, .user-flyout-trigger, #userFlyoutBtn, .user-profile-card');
+    const isInsideDropdown = dropdown ? dropdown.contains(e.target) : false;
+
+    if (trigger) {
       e.preventDefault();
+      e.stopPropagation();
+      if (dropdown) dropdown.classList.toggle('hidden');
+      return;
     }
-    if (dropdown) {
-      dropdown.classList.toggle('hidden');
-    }
-  };
 
-  const flyoutTriggers = ['#profileFlyoutBtn', '#userFlyoutBtn', '.user-flyout-trigger', '.user-profile-card'];
-  flyoutTriggers.forEach(selector => {
-    document.querySelectorAll(selector).forEach(el => {
-      el.style.cursor = 'pointer';
-      el.onclick = toggleDropdown;
-    });
-  });
-
-  document.addEventListener('click', e => {
-    if (dropdown && !dropdown.classList.contains('hidden')) {
-      const isClickInsideDropdown = dropdown.contains(e.target);
-      const isClickOnTrigger = flyoutTriggers.some(sel => {
-        return Array.from(document.querySelectorAll(sel)).some(trg => trg.contains(e.target));
-      });
-
-      if (!isClickInsideDropdown && !isClickOnTrigger) {
-        dropdown.classList.add('hidden');
-      }
+    if (dropdown && !isInsideDropdown && !dropdown.classList.contains('hidden')) {
+      dropdown.classList.add('hidden');
     }
   });
 
-  // Dark/Light Theme Switcher
+  // Handle dropdown menu button clicks
+  document.addEventListener('click', (e) => {
+    const achievementsBtn = e.target.closest('#achievementsMenuBtn');
+    if (achievementsBtn) {
+      e.preventDefault();
+      if (dropdown) dropdown.classList.add('hidden');
+      switchView('progress');
+      showToast('Switched to Progress & Achievements');
+      return;
+    }
+
+    const myProfileBtn = e.target.closest('#myProfileMenuBtn, .dropdown-user-header');
+    if (myProfileBtn) {
+      e.preventDefault();
+      openEditProfileModal();
+      return;
+    }
+
+    const logoutBtn = e.target.closest('#flyoutLogoutBtn');
+    if (logoutBtn) {
+      e.preventDefault();
+      if (dropdown) dropdown.classList.add('hidden');
+      AuthManager.logout();
+      $('#appScreen')?.classList.add('hidden');
+      $('#authScreen')?.classList.remove('hidden');
+      showToast('Logged out successfully.');
+      return;
+    }
+  });
+
+  // Dark / Light Mode Switcher
   const savedTheme = localStorage.getItem('scholarmate_theme') || 'dark';
   if (savedTheme === 'light') {
     document.body.classList.add('light-theme');
@@ -3236,17 +3252,6 @@ function setupProfileFlyout() {
         currentUser.settings.theme = isDark ? 'dark' : 'light';
         AuthManager.setCurrentUser(currentUser);
       }
-    };
-  }
-
-  // Flyout Menu Items
-  if ($('#flyoutLogoutBtn')) {
-    $('#flyoutLogoutBtn').onclick = () => {
-      if (dropdown) dropdown.classList.add('hidden');
-      AuthManager.logout();
-      $('#appScreen').classList.add('hidden');
-      $('#authScreen').classList.remove('hidden');
-      showToast('Logged out successfully.');
     };
   }
 
@@ -3286,14 +3291,6 @@ function setupProfileFlyout() {
         renderAvatarSelectionGrid();
       };
     });
-  }
-
-  if ($('#myProfileMenuBtn')) {
-    $('#myProfileMenuBtn').onclick = openEditProfileModal;
-  }
-  if ($('.dropdown-user-header')) {
-    $('.dropdown-user-header').style.cursor = 'pointer';
-    $('.dropdown-user-header').onclick = openEditProfileModal;
   }
 
   if ($('#closeEditProfileModalBtn')) {
@@ -3337,17 +3334,9 @@ function setupProfileFlyout() {
       }
 
       localStorage.setItem('scholarmate_current_user', newEmail);
-
       updateUIForUser(currentUser);
       $('#editProfileModal')?.classList.add('hidden');
       showToast('Profile name, email, and avatar updated successfully!');
-    };
-  }
-
-  if ($('#achievementsMenuBtn')) {
-    $('#achievementsMenuBtn').onclick = () => {
-      if (dropdown) dropdown.classList.add('hidden');
-      switchView('progress');
     };
   }
 
@@ -3357,11 +3346,12 @@ function setupProfileFlyout() {
 }
 
 function setupShareButton() {
-  const shareBtn = $('#shareBtn');
-  if (!shareBtn) return;
+  document.addEventListener('click', async (e) => {
+    const shareBtn = e.target.closest('#shareBtn');
+    if (!shareBtn) return;
 
-  shareBtn.onclick = async (e) => {
-    if (e) e.preventDefault();
+    e.preventDefault();
+    e.stopPropagation();
     const appUrl = window.location.href || (window.location.origin + window.location.pathname);
     let sharedSuccessfully = false;
 
@@ -3376,9 +3366,7 @@ function setupShareButton() {
         showToast('✓ Link shared successfully!');
         return;
       } catch (shareErr) {
-        if (shareErr && shareErr.name === 'AbortError') {
-          return;
-        }
+        if (shareErr && shareErr.name === 'AbortError') return;
       }
     }
 
@@ -3402,7 +3390,7 @@ function setupShareButton() {
         prompt('ScholarMate AI Website URL:', appUrl);
       }
     }
-  };
+  });
 }
 
 /* ==========================================================================
