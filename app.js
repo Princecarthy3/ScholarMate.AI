@@ -3563,6 +3563,21 @@ async function init() {
     }
   });
 
+  // Handle Install Guide Modal Click Handlers
+  document.addEventListener('click', e => {
+    const openBtn = e.target.closest('#openInstallGuideBtn');
+    if (openBtn) {
+      e.preventDefault();
+      $('#installGuideModal')?.classList.remove('hidden');
+    }
+
+    const closeBtn = e.target.closest('#closeInstallGuideBtn, #dismissInstallGuideBtn');
+    if (closeBtn) {
+      e.preventDefault();
+      $('#installGuideModal')?.classList.add('hidden');
+    }
+  });
+
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has('error')) {
     const errDesc = urlParams.get('error_description') || urlParams.get('error') || 'Authentication failed.';
