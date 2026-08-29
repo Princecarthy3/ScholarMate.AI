@@ -54,11 +54,11 @@
     </div>
   </div>
   <script>
-    setTimeout(function() {
+    setTimeout(function () {
       var p = document.getElementById('appPreloader');
       if (p) {
         p.classList.add('fade-out');
-        setTimeout(function() { p.style.display = 'none'; }, 400);
+        setTimeout(function () { p.style.display = 'none'; }, 400);
       }
     }, 600);
   </script>
@@ -352,15 +352,19 @@
         </div>
 
         <!-- MOBILE APP INSTALLATION NOTICE BANNER -->
-        <div class="glass-card pwa-install-banner" style="margin-bottom:28px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(135deg, rgba(0, 242, 254, 0.1) 0%, rgba(121, 40, 202, 0.1) 100%);border:1px solid rgba(0, 242, 254, 0.25);border-radius:16px;flex-wrap:wrap;">
+        <div class="glass-card pwa-install-banner"
+          style="margin-bottom:28px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(135deg, rgba(0, 242, 254, 0.1) 0%, rgba(121, 40, 202, 0.1) 100%);border:1px solid rgba(0, 242, 254, 0.25);border-radius:16px;flex-wrap:wrap;">
           <div style="display:flex;align-items:center;gap:14px;">
-            <img src="./assets/scholarmate-logo.svg" alt="ScholarMate AI Logo" style="width:44px;height:44px;border-radius:12px;flex-shrink:0;" />
+            <img src="./assets/scholarmate-logo.svg" alt="ScholarMate AI Logo"
+              style="width:44px;height:44px;border-radius:12px;flex-shrink:0;" />
             <div>
-              <strong style="color:var(--text-main);font-size:15px;display:block;">📱 Keep ScholarMate AI on your Phone Screen</strong>
-              <span style="color:var(--text-muted);font-size:12.5px;">Install as a native home screen app for iPhone and Android in 2 quick steps.</span>
+              <strong style="color:var(--text-main);font-size:15px;display:block;">📱 Keep ScholarMate AI on your Phone
+                Screen</strong>
+              <span style="color:var(--text-muted);font-size:12.5px;">Install as a native home screen app for iPhone and
+                Android in 2 quick steps.</span>
             </div>
           </div>
-          <button type="button" class="btn btn-outline btn-sm" id="openInstallGuideBtn" style="white-space:nowrap;">
+          <button type="button" class="btn btn-outline btn-sm" id="openInstallGuideBtn" onclick="document.getElementById('installGuideModal').classList.remove('hidden')" style="white-space:nowrap;">
             <i data-lucide="download"></i> How to Install App
           </button>
         </div>
@@ -1051,66 +1055,70 @@
         </div>
       </form>
     </div>
-  <!-- MOBILE PWA INSTALLATION INSTRUCTIONS MODAL -->
-  <div id="installGuideModal" class="modal-backdrop hidden">
-    <div class="modal-card glass-card" style="max-width:520px;width:92vw;padding:28px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;border-bottom:1px solid var(--border-glass);padding-bottom:14px;">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <img src="./assets/scholarmate-logo.svg" alt="ScholarMate Logo" style="width:32px;height:32px;" />
-          <h3 style="margin:0;font-size:18px;">Install ScholarMate AI App</h3>
-        </div>
-        <button type="button" id="closeInstallGuideBtn" class="close-modal-btn">&times;</button>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:16px;">
-        <!-- iPhone / iOS Guide -->
-        <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border-glass);border-radius:14px;padding:16px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-            <strong style="color:var(--cyan-accent);font-size:14px;">🍏 iPhone & iPad (Safari)</strong>
+    <!-- MOBILE PWA INSTALLATION INSTRUCTIONS MODAL -->
+    <div id="installGuideModal" class="modal-backdrop hidden">
+      <div class="modal-card glass-card" style="max-width:520px;width:92vw;padding:28px;">
+        <div
+          style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;border-bottom:1px solid var(--border-glass);padding-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <img src="./assets/scholarmate-logo.svg" alt="ScholarMate Logo" style="width:32px;height:32px;" />
+            <h3 style="margin:0;font-size:18px;">Install ScholarMate AI App</h3>
           </div>
-          <ol style="margin:0;padding-left:20px;color:var(--text-main);font-size:13px;line-height:1.7;">
-            <li>Open <strong>https://scholarmate-ai.vercel.app</strong> in Safari.</li>
-            <li>Tap the <strong>Share button</strong> <i data-lucide="share" style="width:14px;height:14px;vertical-align:middle;"></i> at the bottom of Safari.</li>
-            <li>Scroll down and tap <strong>"Add to Home Screen"</strong>.</li>
-            <li>Tap <strong>Add</strong> at top right corner.</li>
-          </ol>
+          <button type="button" id="closeInstallGuideBtn" class="close-modal-btn" onclick="document.getElementById('installGuideModal').classList.add('hidden')">&times;</button>
         </div>
 
-        <!-- Android Guide -->
-        <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border-glass);border-radius:14px;padding:16px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-            <strong style="color:var(--emerald-accent);font-size:14px;">🤖 Android (Google Chrome)</strong>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <!-- iPhone / iOS Guide -->
+          <div
+            style="background:rgba(255,255,255,0.04);border:1px solid var(--border-glass);border-radius:14px;padding:16px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <strong style="color:var(--cyan-accent);font-size:14px;">🍏 iPhone & iPad (Safari)</strong>
+            </div>
+            <ol style="margin:0;padding-left:20px;color:var(--text-main);font-size:13px;line-height:1.7;">
+              <li>Open <strong>https://scholarmate-ai.vercel.app</strong> in Safari.</li>
+              <li>Tap the <strong>Share button</strong> <i data-lucide="share"
+                  style="width:14px;height:14px;vertical-align:middle;"></i> at the bottom of Safari.</li>
+              <li>Scroll down and tap <strong>"Add to Home Screen"</strong>.</li>
+              <li>Tap <strong>Add</strong> at top right corner.</li>
+            </ol>
           </div>
-          <ol style="margin:0;padding-left:20px;color:var(--text-main);font-size:13px;line-height:1.7;">
-            <li>Open <strong>https://scholarmate-ai.vercel.app</strong> in Chrome.</li>
-            <li>Tap the <strong>3 dots menu (⋮)</strong> at top right corner.</li>
-            <li>Select <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong>.</li>
-            <li>Confirm installation to place the ScholarMate icon on your launcher!</li>
-          </ol>
-        </div>
-      </div>
 
-      <div style="margin-top:24px;text-align:right;">
-        <button type="button" id="dismissInstallGuideBtn" class="btn btn-primary btn-sm">Got it!</button>
+          <!-- Android Guide -->
+          <div
+            style="background:rgba(255,255,255,0.04);border:1px solid var(--border-glass);border-radius:14px;padding:16px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <strong style="color:var(--emerald-accent);font-size:14px;">🤖 Android (Google Chrome)</strong>
+            </div>
+            <ol style="margin:0;padding-left:20px;color:var(--text-main);font-size:13px;line-height:1.7;">
+              <li>Open <strong>https://scholarmate-ai.vercel.app</strong> in Chrome.</li>
+              <li>Tap the <strong>3 dots menu (⋮)</strong> at top right corner.</li>
+              <li>Select <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong>.</li>
+              <li>Confirm installation to place the ScholarMate icon on your launcher!</li>
+            </ol>
+          </div>
+        </div>
+
+        <div style="margin-top:24px;text-align:right;">
+          <button type="button" id="dismissInstallGuideBtn" class="btn btn-primary btn-sm" onclick="document.getElementById('installGuideModal').classList.add('hidden')">Got it!</button>
+        </div>
       </div>
     </div>
-  </div>
 
 
 
-  <!-- TOAST NOTIFICATION -->
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <!-- APPLICATION SCRIPT -->
-  <script src="./app.js"></script>
-  <script>
-    // Initialize Lucide icons on load
-    document.addEventListener('DOMContentLoaded', () => {
-      if (window.lucide) {
-        lucide.createIcons();
-      }
-    });
-  </script>
+    <!-- APPLICATION SCRIPT -->
+    <script src="./app.js"></script>
+    <script>
+      // Initialize Lucide icons on load
+      document.addEventListener('DOMContentLoaded', () => {
+        if (window.lucide) {
+          lucide.createIcons();
+        }
+      });
+    </script>
 </body>
 
 </html>
