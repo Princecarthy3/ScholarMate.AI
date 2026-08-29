@@ -5,14 +5,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>ScholarMate AI | Professional AI Learning Platform</title>
-  <link rel="icon" type="image/svg+xml" href="./assets/scholarmate-logo.svg" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./assets/icon-192.png" />
   <link rel="manifest" href="./manifest.json" />
   <meta name="theme-color" content="#0b101b" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="ScholarMate AI" />
-  <link rel="apple-touch-icon" href="./assets/scholarmate-logo.svg" />
+  <link rel="apple-touch-icon" sizes="192x192" href="./assets/icon-192.png" />
+  <link rel="apple-touch-icon" sizes="512x512" href="./assets/icon-512.png" />
   <meta name="description"
     content="AI-powered learning workspace with Gemini AI file quiz generation, Google login, and persistent progress tracking." />
 
@@ -348,6 +349,20 @@
             <span>Day Streak</span>
             <small>Streak active today</small>
           </div>
+        </div>
+
+        <!-- MOBILE APP INSTALLATION NOTICE BANNER -->
+        <div class="glass-card pwa-install-banner" style="margin-bottom:28px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(135deg, rgba(0, 242, 254, 0.1) 0%, rgba(121, 40, 202, 0.1) 100%);border:1px solid rgba(0, 242, 254, 0.25);border-radius:16px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <img src="./assets/scholarmate-logo.svg" alt="ScholarMate AI Logo" style="width:44px;height:44px;border-radius:12px;flex-shrink:0;" />
+            <div>
+              <strong style="color:var(--text-main);font-size:15px;display:block;">📱 Keep ScholarMate AI on your Phone Screen</strong>
+              <span style="color:var(--text-muted);font-size:12.5px;">Install as a native home screen app for iPhone and Android in 2 quick steps.</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm" id="openInstallGuideBtn" style="white-space:nowrap;">
+            <i data-lucide="download"></i> How to Install App
+          </button>
         </div>
 
         <!-- QUICK ACCESS GRID -->
@@ -1035,6 +1050,49 @@
           </button>
         </div>
       </form>
+    </div>
+  <!-- MOBILE PWA INSTALLATION INSTRUCTIONS MODAL -->
+  <div id="installGuideModal" class="modal-backdrop hidden">
+    <div class="modal-card glass-card" style="max-width:520px;width:92vw;padding:28px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;border-bottom:1px solid var(--border-glass);padding-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <img src="./assets/scholarmate-logo.svg" alt="ScholarMate Logo" style="width:32px;height:32px;" />
+          <h3 style="margin:0;font-size:18px;">Install ScholarMate AI App</h3>
+        </div>
+        <button type="button" id="closeInstallGuideBtn" class="close-modal-btn">&times;</button>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <!-- iPhone / iOS Guide -->
+        <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border-glass);border-radius:14px;padding:16px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <strong style="color:var(--cyan-accent);font-size:14px;">🍏 iPhone & iPad (Safari)</strong>
+          </div>
+          <ol style="margin:0;padding-left:20px;color:var(--text-main);font-size:13px;line-height:1.7;">
+            <li>Open <strong>https://scholarmate-ai.vercel.app</strong> in Safari.</li>
+            <li>Tap the <strong>Share button</strong> <i data-lucide="share" style="width:14px;height:14px;vertical-align:middle;"></i> at the bottom of Safari.</li>
+            <li>Scroll down and tap <strong>"Add to Home Screen"</strong>.</li>
+            <li>Tap <strong>Add</strong> at top right corner.</li>
+          </ol>
+        </div>
+
+        <!-- Android Guide -->
+        <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border-glass);border-radius:14px;padding:16px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <strong style="color:var(--emerald-accent);font-size:14px;">🤖 Android (Google Chrome)</strong>
+          </div>
+          <ol style="margin:0;padding-left:20px;color:var(--text-main);font-size:13px;line-height:1.7;">
+            <li>Open <strong>https://scholarmate-ai.vercel.app</strong> in Chrome.</li>
+            <li>Tap the <strong>3 dots menu (⋮)</strong> at top right corner.</li>
+            <li>Select <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong>.</li>
+            <li>Confirm installation to place the ScholarMate icon on your launcher!</li>
+          </ol>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;text-align:right;">
+        <button type="button" id="dismissInstallGuideBtn" class="btn btn-primary btn-sm">Got it!</button>
+      </div>
     </div>
   </div>
 
