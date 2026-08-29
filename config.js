@@ -16,7 +16,14 @@ function getSupabase() {
     if (window.supabase && typeof window.supabase.createClient === 'function') {
         try {
             if (SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_URL.includes('YOUR_SUPABASE')) {
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                    auth: {
+                        autoRefreshToken: true,
+                        persistSession: true,
+                        detectSessionInUrl: true,
+                        flowType: 'implicit'
+                    }
+                });
             }
         } catch (e) {
             console.error('Failed to initialize Supabase client:', e);
@@ -27,10 +34,10 @@ function getSupabase() {
 
 // Centralized Backend Gemini API Key Configuration
 // You can set your single shared Gemini API Key here or in api/chat.js / api/chat.php
-const BACKEND_GEMINI_API_KEY = window.ENV_GEMINI_API_KEY || localStorage.getItem('scholarmate_gemini_key') || 'AQ.Ab8RN6JjfpyDUJWa1gAgGTr7nnfvSc6rE0-Zjm1AYhhEOqQnzw';
+const BACKEND_GEMINI_API_KEY = window.ENV_GEMINI_API_KEY || localStorage.getItem('scholarmate_gemini_key') || 'YOUR_GEMINI_API_KEY_HERE';
 
 function getGeminiApiKey() {
-    const key = window.GEMINI_API_KEY || localStorage.getItem('scholarmate_gemini_key') || window.ENV_GEMINI_API_KEY || (BACKEND_GEMINI_API_KEY !== 'AQ.Ab8RN6JjfpyDUJWa1gAgGTr7nnfvSc6rE0-Zjm1AYhhEOqQnzw' ? BACKEND_GEMINI_API_KEY : '') || '';
+    const key = window.GEMINI_API_KEY || localStorage.getItem('scholarmate_gemini_key') || window.ENV_GEMINI_API_KEY || (BACKEND_GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY_HERE' ? BACKEND_GEMINI_API_KEY : '') || '';
     return key;
 }
 
@@ -52,3 +59,4 @@ window.setGeminiApiKey = setGeminiApiKey;
 window.getSupabase = getSupabase;
 window.SUPABASE_URL = SUPABASE_URL;
 window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
+
