@@ -298,11 +298,11 @@ const AuthManager = {
    ========================================================================== */
 
 async function callGeminiApi(promptText, options = {}) {
-  const userKey = window.getGeminiApiKey ? window.getGeminiApiKey() : (window.GEMINI_API_KEY || localStorage.getItem('scholarmate_gemini_key') || 'AQ.Ab8RN6If5Rk5prL6tSIyvZYFM2_8CkbfLOFsDdK2Nvzl5zgs3A');
+  const userKey = window.getGeminiApiKey ? window.getGeminiApiKey() : (window.GEMINI_API_KEY || localStorage.getItem('scholarmate_gemini_key') || '');
 
   // 1. Try PHP Local Endpoint (Fastest & most reliable on XAMPP/Localhost)
   try {
-    const response = await fetch('./api/chat.php', {
+    const response = await fetch('./api/chat-local.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: promptText, apiKey: userKey })
@@ -316,12 +316,12 @@ async function callGeminiApi(promptText, options = {}) {
     console.warn('PHP local endpoint call bypassed:', e);
   }
 
-  // 2. Try Vercel Serverless Function (/api/chat.js)
+  // 2. Try Vercel Serverless Function (/api/chat)
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    const response = await fetch('./api/chat.js', {
+    const response = await fetch('./api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: promptText, apiKey: userKey }),
@@ -3016,6 +3016,57 @@ function renderMaterialsList(materials = []) {
       }
     };
   });
+}
+
+function setupMaterialsManager() {
+  const addBtn = $('#addMaterialBtn');
+  const fileInput = $('#materialsFileInput');
+
+  if (addBtn && fileInput) {
+    addBtn.onclick = () => fileInput.click();
+  }
+
+  if (fileInput) {
+    fileInput.onchange = async e => {
+      const file = e.target.files[0];
+      if (file) handleMaterialUpload(file);
+    };
+  }
+
+  // Drag & Drop for Materials View
+  const grid = $('#materialsGrid');
+  const view = $('#materialsView');
+
+  [grid, view].forEach(el => {
+    if (!el) return;
+    ['dragenter', 'dragover'].forEach(eventName => {
+      el.addEventListener(eventName, e => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (grid) grid.classList.add('drag-over');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      el.addEventListener(eventName, e => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (grid) grid.classList.remove('drag-over');
+      });
+    });
+
+    el.addEventListener('drop', e => {
+      const file = e.dataTransfer?.files[0];
+      if (file) handleMaterialUpload(file);
+    });
+  });
+
+  if ($('#startStudyingBtn')) {
+    $('#startStudyingBtn').onclick = () => {
+      switchView('tutor');
+      showToast('Switched to Smart Study AI Canvas!');
+    };
+  }
 }
 
 /* ==========================================================================
