@@ -3526,6 +3526,37 @@ function initPreloader() {
 async function init() {
   initPreloader();
 
+  // Register PWA Service Worker for Mobile Offline & Native App Experience
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').then(reg => {
+        console.log('ScholarMate AI PWA Service Worker active:', reg.scope);
+      }).catch(err => console.warn('PWA SW registration bypass:', err));
+    });
+  }
+
+  // Mobile PWA Installation Prompt Handler
+  let deferredInstallPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    showToast('📱 Add ScholarMate AI to your Mobile Home Screen!');
+    const installBtn = $('#pwaInstallBtn');
+    if (installBtn) {
+      installBtn.classList.remove('hidden');
+      installBtn.onclick = async () => {
+        if (!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        const choice = await deferredInstallPrompt.userChoice;
+        if (choice.outcome === 'accepted') {
+          showToast('✓ ScholarMate AI installed on your Home Screen!');
+        }
+        deferredInstallPrompt = null;
+        installBtn.classList.add('hidden');
+      };
+    }
+  });
+
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has('error')) {
     const errDesc = urlParams.get('error_description') || urlParams.get('error') || 'Authentication failed.';
