@@ -755,15 +755,28 @@
 
       <!-- VIEW 5: FLASHCARDS (3D FLIP ACTIVE RECALL DECK) -->
       <section id="flashcardsView" class="view">
-        <div class="view-header">
+        <div class="view-header" style="flex-wrap:wrap;gap:16px;align-items:center;">
           <div>
             <span class="kicker">Active Recall Deck</span>
             <h2>Interactive Flashcards</h2>
             <p>Master concepts using 3D flip card self-assessment.</p>
           </div>
-          <button class="btn btn-primary" id="generateFlashcardsBtn">
-            <i data-lucide="sparkles"></i> Generate New Deck
-          </button>
+          <div style="display:flex;align-items:center;gap:10px;margin-left:auto;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid var(--border-glass-bright);padding:6px 12px;border-radius:10px;">
+              <i data-lucide="layers" style="width:16px;height:16px;color:var(--cyan-accent);"></i>
+              <label for="flashcardCountSelect" style="font-size:12px;color:var(--text-muted);font-weight:600;">Cards:</label>
+              <select id="flashcardCountSelect" style="background:transparent;border:none;color:var(--text-main);font-size:12.5px;font-weight:700;outline:none;cursor:pointer;">
+                <option value="3" style="background:var(--bg-dark);color:var(--text-main);">3 Cards</option>
+                <option value="5" selected style="background:var(--bg-dark);color:var(--text-main);">5 Cards</option>
+                <option value="10" style="background:var(--bg-dark);color:var(--text-main);">10 Cards</option>
+                <option value="15" style="background:var(--bg-dark);color:var(--text-main);">15 Cards</option>
+                <option value="20" style="background:var(--bg-dark);color:var(--text-main);">20 Cards</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" id="generateFlashcardsBtn">
+              <i data-lucide="sparkles"></i> Generate New Deck
+            </button>
+          </div>
         </div>
 
         <div class="flashcards-runner-container">
