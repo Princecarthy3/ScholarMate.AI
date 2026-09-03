@@ -1384,6 +1384,8 @@ function renderMasteryList(masteryObj = {}) {
 
 function switchView(viewId) {
   currentView = viewId;
+  document.body.className = `view-${viewId}`;
+
   $$('.view').forEach(v => v.classList.remove('active-view'));
   $(`#${viewId}View`)?.classList.add('active-view');
   
@@ -1397,9 +1399,9 @@ function switchView(viewId) {
   const topHomeBtn = $('#topHomeBtn');
   if (topHomeBtn) {
     if (viewId === 'overview') {
-      topHomeBtn.style.display = 'none';
+      topHomeBtn.style.setProperty('display', 'none', 'important');
     } else {
-      topHomeBtn.style.display = '';
+      topHomeBtn.style.removeProperty('display');
     }
   }
 
@@ -3692,6 +3694,8 @@ async function init() {
       $('#installGuideModal')?.classList.add('hidden');
     }
   });
+
+
 
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has('error')) {
