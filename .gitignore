@@ -11,3 +11,5 @@ scratch/
 .gemini/
 .idea/
 .vscode/
+.env.*
+!.env.example
