@@ -32,30 +32,13 @@ function getSupabase() {
     return supabaseClient;
 }
 
-// Centralized Backend Gemini API Key Configuration
-// You can set your single shared Gemini API Key here or in api/chat.js / api/chat.php
-const BACKEND_GEMINI_API_KEY = window.ENV_GEMINI_API_KEY || localStorage.getItem('scholarmate_gemini_key') || 'AQ.Ab8RN6JjfpyDUJWa1gAgGTr7nnfvSc6rE0-Zjm1AYhhEOqQnzw';
+// OpenRouter is configured on the backend only.
+// Do NOT put the OpenRouter secret key in this browser-side file.
+// Vercel: set OPENROUTER_API_KEY in Project Settings -> Environment Variables.
+// XAMPP/PHP: set OPENROUTER_API_KEY as a server environment variable, or configure
+// the placeholder in api/chat-local.php for local development only.
+const OPENROUTER_MODEL = 'google/gemma-4-31b-it:free';
+const OPENROUTER_FALLBACK_MODEL = 'google/gemma-4-26b-a4b-it:free';
 
-function getGeminiApiKey() {
-    const key = window.GEMINI_API_KEY || localStorage.getItem('scholarmate_gemini_key') || window.ENV_GEMINI_API_KEY || (BACKEND_GEMINI_API_KEY !== 'AQ.Ab8RN6JjfpyDUJWa1gAgGTr7nnfvSc6rE0-Zjm1AYhhEOqQnzw' ? BACKEND_GEMINI_API_KEY : '') || '';
-    return key;
-}
-
-function setGeminiApiKey(key) {
-    const cleanKey = (key || '').trim();
-    if (cleanKey) {
-        localStorage.setItem('scholarmate_gemini_key', cleanKey);
-    } else {
-        localStorage.removeItem('scholarmate_gemini_key');
-    }
-    window.GEMINI_API_KEY = cleanKey;
-    return cleanKey;
-}
-
-const GEMINI_API_KEY = getGeminiApiKey();
-window.GEMINI_API_KEY = GEMINI_API_KEY;
-window.getGeminiApiKey = getGeminiApiKey;
-window.setGeminiApiKey = setGeminiApiKey;
-window.getSupabase = getSupabase;
-window.SUPABASE_URL = SUPABASE_URL;
-window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
+window.OPENROUTER_MODEL = OPENROUTER_MODEL;
+window.OPENROUTER_FALLBACK_MODEL = OPENROUTER_FALLBACK_MODEL;
