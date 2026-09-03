@@ -3137,13 +3137,14 @@ function setupFlashcardsEngine() {
   if ($('#generateFlashcardsBtn')) {
     $('#generateFlashcardsBtn').onclick = async () => {
       const topic = $('#currentSubjectName')?.textContent || 'Academic Writing';
-      showToast('Synthesizing active recall flashcard deck...');
+      const cardCount = parseInt($('#flashcardCountSelect')?.value || '5', 10);
+      showToast(`Synthesizing ${cardCount} active recall flashcards...`);
       if ($('#cardQuestionText')) $('#cardQuestionText').textContent = 'Synthesizing question...';
       if ($('#cardAnswerText')) $('#cardAnswerText').textContent = 'Formulating explanation...';
 
-      let prompt = `Generate 5 active recall flashcards on the topic "${topic}". Return ONLY a JSON array formatted as: [{"question": "...", "answer": "..."}]`;
+      let prompt = `Generate ${cardCount} active recall flashcards on the topic "${topic}". Return ONLY a JSON array formatted as: [{"question": "...", "answer": "..."}]`;
       if (attachedFileContent) {
-        prompt = `Generate 5 active recall flashcards based on this document context (${attachedFileName}):\n"${attachedFileContent.slice(0, 3000)}"\nReturn ONLY a JSON array formatted as: [{"question": "...", "answer": "..."}]`;
+        prompt = `Generate ${cardCount} active recall flashcards based on this document context (${attachedFileName}):\n"${attachedFileContent.slice(0, 3000)}"\nReturn ONLY a JSON array formatted as: [{"question": "...", "answer": "..."}]`;
       }
 
       try {
@@ -3166,7 +3167,7 @@ function setupFlashcardsEngine() {
 
       currentFlashcardIndex = 0;
       renderFlashcard();
-      showToast('Flashcard deck ready! Click card to flip.');
+      showToast(`${activeFlashcardDeck.length} flashcards ready! Click card to flip.`);
     };
   }
 
