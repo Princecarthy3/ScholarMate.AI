@@ -850,10 +850,6 @@ textarea:focus {
   gap: 8px;
 }
 
-#topHomeBtn {
-  display: none !important;
-}
-
 #topHomeBtn.active {
   border-color: var(--cyan-accent);
   color: var(--cyan-accent);
@@ -3859,41 +3855,6 @@ body.light-theme .mobile-bottom-nav {
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
-  }
-
-  .topbar-actions {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    flex-wrap: nowrap !important;
-    gap: 8px !important;
-  }
-
-  #topHomeBtn {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 6px !important;
-    height: 36px !important;
-    padding: 0 12px !important;
-    width: auto !important;
-    min-width: auto !important;
-    white-space: nowrap !important;
-    font-size: 12px !important;
-    flex-shrink: 0 !important;
-  }
-
-  #shareBtn {
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 6px !important;
-    height: 36px !important;
-    padding: 0 12px !important;
-    width: auto !important;
-    min-width: auto !important;
-    white-space: nowrap !important;
-    font-size: 12px !important;
-    flex-shrink: 0 !important;
   }
 
   .quick-prompts-row {
