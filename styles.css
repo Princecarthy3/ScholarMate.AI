@@ -2079,7 +2079,7 @@ textarea:focus {
 }
 
 /* MOBILE BOTTOM NAVIGATION BAR (HIDDEN ON DESKTOP BY DEFAULT) */
-.mobile-bottom-nav {
+.mobile-bottom-nav, #topHomeBtn {
   display: none !important;
 }
 
@@ -2226,9 +2226,15 @@ textarea:focus {
   }
 
   .profile-dropdown-menu {
-    right: 0;
-    width: calc(100vw - 28px);
-    max-width: 320px;
+    position: fixed !important;
+    top: 68px !important;
+    right: 14px !important;
+    left: 14px !important;
+    width: auto !important;
+    max-width: calc(100vw - 28px) !important;
+    box-sizing: border-box !important;
+    z-index: 99999 !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9) !important;
   }
 
   .hero-banner {
@@ -3847,6 +3853,19 @@ body.light-theme .mobile-bottom-nav {
     margin-left: 0 !important;
     width: 100% !important;
     justify-content: space-between !important;
+  }
+
+  body:not(.view-overview) #topHomeBtn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    height: 36px !important;
+    padding: 0 12px !important;
+    width: auto !important;
+    white-space: nowrap !important;
+    font-size: 12px !important;
+    flex-shrink: 0 !important;
   }
 
   /* Smart Study / Tutor View Mobile Responsive Styles */
