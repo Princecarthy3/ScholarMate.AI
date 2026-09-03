@@ -40,12 +40,22 @@ $models = [
     'gemini-3.5-flash-lite',
     'gemini-2.5-flash'
 ];
+$parts = [
+    ["text" => !empty($message) ? $message : "Analyze this attached image and explain the concepts shown."]
+];
+if (!empty($input['inlineData']) && !empty($input['inlineData']['data'])) {
+    $parts[] = [
+        "inline_data" => [
+            "mime_type" => $input['inlineData']['mimeType'] ?? "image/jpeg",
+            "data" => $input['inlineData']['data']
+        ]
+    ];
+}
+
 $payload = json_encode([
     "contents" => [
         [
-            "parts" => [
-                ["text" => $message]
-            ]
+            "parts" => $parts
         ]
     ]
 ]);
