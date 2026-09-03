@@ -302,10 +302,13 @@ async function callGeminiApi(promptText, options = {}) {
 
   // 1. Try PHP Local Endpoint (Fastest & most reliable on XAMPP/Localhost)
   try {
+    const payload = { message: promptText, apiKey: userKey };
+    if (options.inlineData) payload.inlineData = options.inlineData;
+
     const response = await fetch('./api/chat-local.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: promptText, apiKey: userKey })
+      body: JSON.stringify(payload)
     });
     if (response.ok) {
       const data = await response.json();
@@ -321,10 +324,13 @@ async function callGeminiApi(promptText, options = {}) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
+    const payload = { message: promptText, apiKey: userKey };
+    if (options.inlineData) payload.inlineData = options.inlineData;
+
     const response = await fetch('./api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: promptText, apiKey: userKey }),
+      body: JSON.stringify(payload),
       signal: controller.signal
     });
     clearTimeout(timeoutId);
@@ -341,13 +347,23 @@ async function callGeminiApi(promptText, options = {}) {
   // 3. Direct Gemini Engine with active valid public models
   const validModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
   if (userKey && userKey.trim().length > 10 && userKey.startsWith('AIzaSy')) {
+    const parts = [{ text: promptText || "Analyze this image and explain." }];
+    if (options.inlineData && options.inlineData.data) {
+      parts.push({
+        inline_data: {
+          mime_type: options.inlineData.mimeType || 'image/jpeg',
+          data: options.inlineData.data
+        }
+      });
+    }
+
     for (const model of validModels) {
       try {
         const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(userKey.trim())}`;
         const directRes = await fetch(directUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+          body: JSON.stringify({ contents: [{ parts }] })
         });
 
         if (directRes.ok) {
@@ -1380,7 +1396,11 @@ function switchView(viewId) {
 
   const topHomeBtn = $('#topHomeBtn');
   if (topHomeBtn) {
-    topHomeBtn.classList.toggle('active', viewId === 'overview');
+    if (viewId === 'overview') {
+      topHomeBtn.style.display = 'none';
+    } else {
+      topHomeBtn.style.display = '';
+    }
   }
 
   const shareBtn = $('#shareBtn');
@@ -2228,16 +2248,83 @@ function setupTutorChat() {
     };
   }
 
+  let attachedImageData = null;
+  let attachedImageName = '';
+  let attachedImageDataUrl = '';
+
+  const handleImageSelect = file => {
+    if (!file) return;
+    if (!file.type || !file.type.startsWith('image/')) {
+      showToast('Please select a valid image file (PNG, JPG, WEBP).');
+      return;
+    }
+    showToast('Processing image for AI recognition...');
+    const reader = new FileReader();
+    reader.onload = e => {
+      attachedImageDataUrl = e.target.result;
+      const base64Data = attachedImageDataUrl.split(',')[1];
+      attachedImageData = {
+        mimeType: file.type || 'image/jpeg',
+        data: base64Data
+      };
+      attachedImageName = file.name || 'Photo Recognition';
+
+      if ($('#attachedImagePreview')) $('#attachedImagePreview').src = attachedImageDataUrl;
+      if ($('#attachedImageNameText')) $('#attachedImageNameText').textContent = attachedImageName;
+      if ($('#attachedImageChip')) $('#attachedImageChip').classList.remove('hidden');
+      showToast('✓ Image attached for AI recognition!');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  if ($('#chatImageInput')) {
+    $('#chatImageInput').onchange = e => {
+      const file = e.target.files[0];
+      handleImageSelect(file);
+      e.target.value = '';
+    };
+  }
+
+  if ($('#chatCameraInput')) {
+    $('#chatCameraInput').onchange = e => {
+      const file = e.target.files[0];
+      handleImageSelect(file);
+      e.target.value = '';
+    };
+  }
+
+  if ($('#removeImageBtn')) {
+    $('#removeImageBtn').onclick = () => {
+      attachedImageData = null;
+      attachedImageName = '';
+      attachedImageDataUrl = '';
+      if ($('#attachedImageChip')) $('#attachedImageChip').classList.add('hidden');
+    };
+  }
+
   if ($('#chatForm')) {
     $('#chatForm').onsubmit = async e => {
       e.preventDefault();
       const input = $('#studentInput');
       if (!input) return;
       const query = input.value.trim();
-      if (!query) return;
+      if (!query && !attachedImageData) return;
 
+      const userPrompt = query || 'Please analyze this attached image, extract any key details or text, and explain it clearly.';
       input.value = '';
-      appendMessage('user', query);
+
+      let userMsgContent = cleanMarkdown(userPrompt);
+      if (attachedImageDataUrl) {
+        userMsgContent += `<br><img src="${attachedImageDataUrl}" style="max-width:220px;max-height:220px;border-radius:10px;margin-top:8px;display:block;border:1px solid var(--border-glass-bright);" alt="Attached Image" />`;
+      }
+      appendMessage('user', userMsgContent);
+
+      const currentImageData = attachedImageData ? { ...attachedImageData } : null;
+
+      attachedImageData = null;
+      attachedImageName = '';
+      attachedImageDataUrl = '';
+      if ($('#attachedImageChip')) $('#attachedImageChip').classList.add('hidden');
 
       if (currentUser) {
         if (!currentUser.chatThreads) currentUser.chatThreads = [];
@@ -2245,13 +2332,13 @@ function setupTutorChat() {
         if (!thread) {
           thread = {
             id: activeChatThreadId,
-            title: query.slice(0, 24) + (query.length > 24 ? '...' : ''),
+            title: userPrompt.slice(0, 24) + (userPrompt.length > 24 ? '...' : ''),
             createdAt: new Date().toISOString(),
             messages: []
           };
           currentUser.chatThreads.unshift(thread);
         }
-        thread.messages.push({ role: 'user', message: query });
+        thread.messages.push({ role: 'user', message: userMsgContent });
         AuthManager.setCurrentUser(currentUser);
         renderChatThreadsList();
 
@@ -2260,21 +2347,21 @@ function setupTutorChat() {
           supabase.from('user_chats').insert({
             user_id: currentUser.id,
             role: 'user',
-            message: query,
-            attached_file: attachedFileName || null
+            message: userPrompt,
+            attached_file: attachedFileName || attachedImageName || null
           }).then();
         }
       }
 
-      const loadingArt = appendMessage('assistant', 'Thinking through your question cleanly…');
+      const loadingArt = appendMessage('assistant', 'Analyzing image & query with ScholarMate AI engine...');
 
-      let fullPrompt = query;
+      let fullPrompt = userPrompt;
       if (attachedFileContent) {
-        fullPrompt = `Document Context (${attachedFileName}):\n"${attachedFileContent.slice(0, 2500)}"\n\nStudent Question:\n${query}`;
+        fullPrompt = `Document Context (${attachedFileName}):\n"${attachedFileContent.slice(0, 2500)}"\n\nStudent Question:\n${userPrompt}`;
       }
 
       try {
-        const rawAnswer = await callGeminiApi(fullPrompt);
+        const rawAnswer = await callGeminiApi(fullPrompt, { inlineData: currentImageData });
         const cleanAnswerHtml = cleanMarkdown(rawAnswer);
         if (loadingArt && loadingArt.querySelector('.bubble-content')) {
           loadingArt.querySelector('.bubble-content').innerHTML = cleanAnswerHtml;
