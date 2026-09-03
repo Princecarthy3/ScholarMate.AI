@@ -267,9 +267,14 @@
           </div>
         </div>
         <div class="topbar-right">
-          <button class="btn btn-outline btn-sm" id="shareBtn">
-            <i data-lucide="share-2"></i> + Share
-          </button>
+          <div class="topbar-actions">
+            <button class="btn btn-outline btn-sm" id="topHomeBtn" data-view="overview" type="button" title="Home">
+              <i data-lucide="home"></i> <span>Home</span>
+            </button>
+            <button class="btn btn-outline btn-sm" id="shareBtn" type="button">
+              <i data-lucide="share-2"></i> <span>Share App</span>
+            </button>
+          </div>
 
           <!-- USER PROFILE FLYOUT BUTTON & MENU -->
           <div class="profile-flyout-wrapper" id="profileFlyoutWrapper">
@@ -301,7 +306,7 @@
                 <i data-lucide="user"></i> My profile
               </button>
               <button class="dropdown-item" id="achievementsMenuBtn" type="button">
-                <i data-lucide="award"></i> Achievements
+                <i data-lucide="award"></i> Achievements & Stats
               </button>
 
               <div class="dropdown-item theme-switch-item">
@@ -902,10 +907,6 @@
 
     <!-- MOBILE FIXED BOTTOM TAB BAR -->
     <nav class="mobile-bottom-nav" id="mobileBottomNav">
-      <button type="button" class="mobile-nav-tab active" data-view="overview">
-        <i data-lucide="home"></i>
-        <span>Home</span>
-      </button>
       <button type="button" class="mobile-nav-tab" data-view="materials">
         <i data-lucide="folder-open"></i>
         <span>Materials</span>
@@ -925,10 +926,6 @@
       <button type="button" class="mobile-nav-tab" data-view="quizzes">
         <i data-lucide="check-square"></i>
         <span>Test</span>
-      </button>
-      <button type="button" class="mobile-nav-tab" data-view="progress">
-        <i data-lucide="bar-chart-2"></i>
-        <span>Stats</span>
       </button>
     </nav>
   </div>
