@@ -1378,6 +1378,26 @@ function switchView(viewId) {
     nav.classList.toggle('active', nav.dataset.view === viewId);
   });
 
+  const topHomeBtn = $('#topHomeBtn');
+  if (topHomeBtn) {
+    topHomeBtn.classList.toggle('active', viewId === 'overview');
+  }
+
+  const shareBtn = $('#shareBtn');
+  if (shareBtn) {
+    if (viewId === 'overview') {
+      shareBtn.style.display = 'inline-flex';
+      shareBtn.innerHTML = `<i data-lucide="share-2"></i> <span>Share App</span>`;
+      if (window.lucide) lucide.createIcons();
+    } else if (viewId === 'quizzes') {
+      shareBtn.style.display = 'inline-flex';
+      shareBtn.innerHTML = `<i data-lucide="share-2"></i> <span>Share Test</span>`;
+      if (window.lucide) lucide.createIcons();
+    } else {
+      shareBtn.style.display = 'none';
+    }
+  }
+
   if (viewId === 'quizzes') {
     renderQuizMaterialOptions();
   }
@@ -3438,15 +3458,22 @@ function setupShareButton() {
     const appUrl = window.location.href || (window.location.origin + window.location.pathname);
     let sharedSuccessfully = false;
 
+    const isTestShare = (currentView === 'quizzes');
+    const shareTitle = isTestShare ? 'ScholarMate AI Test Challenge' : 'ScholarMate AI Workspace';
+    const shareText = isTestShare 
+      ? 'Try your hands on this AI-generated test & quiz on ScholarMate AI!'
+      : 'Study smarter with ScholarMate AI - Smart Study Assistant, AI Tutor & Quiz Engine!';
+    const successToast = isTestShare ? '✓ Test link shared successfully!' : '✓ App link shared successfully!';
+
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'ScholarMate AI Workspace',
-          text: 'Study smarter with ScholarMate AI - Smart Study Assistant, AI Tutor & Quiz Engine!',
+          title: shareTitle,
+          text: shareText,
           url: appUrl
         });
         sharedSuccessfully = true;
-        showToast('✓ Link shared successfully!');
+        showToast(successToast);
         return;
       } catch (shareErr) {
         if (shareErr && shareErr.name === 'AbortError') return;
@@ -3468,9 +3495,9 @@ function setupShareButton() {
           document.execCommand('copy');
           document.body.removeChild(textArea);
         }
-        showToast(`✓ Website link copied to clipboard!`);
+        showToast(isTestShare ? '✓ Test link copied to clipboard!' : '✓ App link copied to clipboard!');
       } catch (err) {
-        prompt('ScholarMate AI Website URL:', appUrl);
+        prompt(isTestShare ? 'ScholarMate AI Test Link:' : 'ScholarMate AI Website URL:', appUrl);
       }
     }
   });
