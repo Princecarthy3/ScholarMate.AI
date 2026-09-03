@@ -369,7 +369,9 @@
                 Android in 2 quick steps.</span>
             </div>
           </div>
-          <button type="button" class="btn btn-outline btn-sm" id="openInstallGuideBtn" onclick="document.getElementById('installGuideModal').classList.remove('hidden')" style="white-space:nowrap;">
+          <button type="button" class="btn btn-outline btn-sm" id="openInstallGuideBtn"
+            onclick="document.getElementById('installGuideModal').classList.remove('hidden')"
+            style="white-space:nowrap;">
             <i data-lucide="download"></i> How to Install App
           </button>
         </div>
@@ -549,13 +551,29 @@
               <span id="attachedFileName">document.pdf</span>
               <button type="button" id="removeFileBtn">&times;</button>
             </div>
+            <div class="attached-file-chip hidden" id="attachedImageChip" style="border-color:var(--cyan-accent);background:rgba(0,242,254,0.1);">
+              <i data-lucide="image"></i>
+              <img id="attachedImagePreview" src="" alt="Preview" style="width:26px;height:26px;border-radius:6px;object-fit:cover;border:1px solid var(--border-glass-bright);" />
+              <span id="attachedImageNameText">image.png</span>
+              <button type="button" id="removeImageBtn" title="Remove image">&times;</button>
+            </div>
             <div class="textarea-wrapper">
               <textarea id="studentInput" rows="2"
-                placeholder="Ask a question, request a breakdown, or ask about an uploaded file..." required></textarea>
+                placeholder="Ask a question, upload diagrams/photos, or ask about an attached file..." required></textarea>
               <div class="composer-actions">
-                <label for="chatFileInput" class="icon-btn-label" title="Attach text, PDF, Word, or PowerPoint file">
+                <label for="chatFileInput" class="icon-btn-label" title="Attach document (PDF, TXT, Word, PPT)">
                   <i data-lucide="paperclip"></i>
                   <input type="file" id="chatFileInput" accept=".pdf,.txt,.md,.doc,.docx,.ppt,.pptx,.json"
+                    class="hidden" />
+                </label>
+                <label for="chatImageInput" class="icon-btn-label" title="Upload image or diagram for AI recognition">
+                  <i data-lucide="image"></i>
+                  <input type="file" id="chatImageInput" accept="image/png,image/jpeg,image/webp,image/gif"
+                    class="hidden" />
+                </label>
+                <label for="chatCameraInput" class="icon-btn-label" title="Take a photo / picture with camera">
+                  <i data-lucide="camera"></i>
+                  <input type="file" id="chatCameraInput" accept="image/*" capture="environment"
                     class="hidden" />
                 </label>
                 <button class="btn btn-primary btn-icon-text" type="submit" id="sendButton">
@@ -762,10 +780,13 @@
             <p>Master concepts using 3D flip card self-assessment.</p>
           </div>
           <div style="display:flex;align-items:center;gap:10px;margin-left:auto;flex-wrap:wrap;">
-            <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid var(--border-glass-bright);padding:6px 12px;border-radius:10px;">
+            <div
+              style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid var(--border-glass-bright);padding:6px 12px;border-radius:10px;">
               <i data-lucide="layers" style="width:16px;height:16px;color:var(--cyan-accent);"></i>
-              <label for="flashcardCountSelect" style="font-size:12px;color:var(--text-muted);font-weight:600;">Cards:</label>
-              <select id="flashcardCountSelect" style="background:transparent;border:none;color:var(--text-main);font-size:12.5px;font-weight:700;outline:none;cursor:pointer;">
+              <label for="flashcardCountSelect"
+                style="font-size:12px;color:var(--text-muted);font-weight:600;">Cards:</label>
+              <select id="flashcardCountSelect"
+                style="background:transparent;border:none;color:var(--text-main);font-size:12.5px;font-weight:700;outline:none;cursor:pointer;">
                 <option value="3" style="background:var(--bg-dark);color:var(--text-main);">3 Cards</option>
                 <option value="5" selected style="background:var(--bg-dark);color:var(--text-main);">5 Cards</option>
                 <option value="10" style="background:var(--bg-dark);color:var(--text-main);">10 Cards</option>
@@ -1066,7 +1087,7 @@
       </form>
     </div>
     <!-- MOBILE PWA INSTALLATION INSTRUCTIONS MODAL -->
-    <div id="installGuideModal" class="modal-backdrop hidden">
+    <div id="installGuideModal" class="modal-overlay hidden">
       <div class="modal-card glass-card" style="max-width:520px;width:92vw;padding:28px;">
         <div
           style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;border-bottom:1px solid var(--border-glass);padding-bottom:14px;">
@@ -1074,7 +1095,8 @@
             <img src="./assets/scholarmate-logo.svg" alt="ScholarMate Logo" style="width:32px;height:32px;" />
             <h3 style="margin:0;font-size:18px;">Install ScholarMate AI App</h3>
           </div>
-          <button type="button" id="closeInstallGuideBtn" class="close-modal-btn" onclick="document.getElementById('installGuideModal').classList.add('hidden')">&times;</button>
+          <button type="button" id="closeInstallGuideBtn" class="close-modal-btn"
+            onclick="document.getElementById('installGuideModal').classList.add('hidden')">&times;</button>
         </div>
 
         <div style="display:flex;flex-direction:column;gap:16px;">
@@ -1109,7 +1131,8 @@
         </div>
 
         <div style="margin-top:24px;text-align:right;">
-          <button type="button" id="dismissInstallGuideBtn" class="btn btn-primary btn-sm" onclick="document.getElementById('installGuideModal').classList.add('hidden')">Got it!</button>
+          <button type="button" id="dismissInstallGuideBtn" class="btn btn-primary btn-sm"
+            onclick="document.getElementById('installGuideModal').classList.add('hidden')">Got it!</button>
         </div>
       </div>
     </div>
