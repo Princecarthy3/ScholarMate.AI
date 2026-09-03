@@ -15,106 +15,97 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-// CENTRALIZED BACKEND GEMINI API KEY
-$BACKEND_GEMINI_API_KEY = getenv('GEMINI_API_KEY') ?: '';
+$BACKEND_OPENROUTER_API_KEY = getenv('OPENROUTER_API_KEY') ?: '';
 
-$input = json_decode(file_get_contents('php://input'), true);
+// For local XAMPP development only, you may temporarily place your key here.
+// Never commit a real key to GitHub or expose it in frontend JavaScript.
+if (empty($BACKEND_OPENROUTER_API_KEY)) {
+    $BACKEND_OPENROUTER_API_KEY = 'YOUR_OPENROUTER_API_KEY_HERE';
+}
+
+$input = json_decode(file_get_contents('php://input'), true) ?: [];
 $message = $input['message'] ?? '';
 
-$apiKey = !empty($BACKEND_GEMINI_API_KEY) ? trim($BACKEND_GEMINI_API_KEY) : '';
-
-if (empty($message)) {
-    http_response_code(400);
-    echo json_encode(["error" => "Message is required"]);
+if (empty($BACKEND_OPENROUTER_API_KEY) || $BACKEND_OPENROUTER_API_KEY === 'YOUR_OPENROUTER_API_KEY_HERE') {
+    http_response_code(500);
+    echo json_encode([
+        "error" => "OPENROUTER_API_KEY is missing. Set the OPENROUTER_API_KEY server environment variable or configure api/chat-local.php for local development."
+    ]);
     exit();
 }
 
-if (empty($apiKey)) {
+if (empty($message) && empty($input['inlineData']['data'])) {
     http_response_code(400);
-    echo json_encode(["error" => "Centralized Backend Gemini API Key is missing. Please paste your Gemini API Key in api/chat.php ($BACKEND_GEMINI_API_KEY) or api/chat.js (CENTRALIZED_GEMINI_API_KEY)."]);
+    echo json_encode(["error" => "Message or image is required"]);
     exit();
 }
 
-$models = [
-    'gemini-3.6-flash',
-    'gemini-3.5-flash-lite',
-    'gemini-2.5-flash'
-];
-$parts = [
-    ["text" => !empty($message) ? $message : "Analyze this attached image and explain the concepts shown."]
-];
-if (!empty($input['inlineData']) && !empty($input['inlineData']['data'])) {
-    $parts[] = [
-        "inline_data" => [
-            "mime_type" => $input['inlineData']['mimeType'] ?? "image/jpeg",
-            "data" => $input['inlineData']['data']
+$userContent = [[
+    "type" => "text",
+    "text" => !empty($message) ? $message : "Analyze the attached image and explain the concepts shown."
+]];
+
+if (!empty($input['inlineData']['data'])) {
+    $mimeType = $input['inlineData']['mimeType'] ?? 'image/jpeg';
+    $userContent[] = [
+        "type" => "image_url",
+        "image_url" => [
+            "url" => "data:{$mimeType};base64," . $input['inlineData']['data']
         ]
     ];
 }
 
-$payload = json_encode([
-    "contents" => [
-        [
-            "parts" => $parts
-        ]
-    ]
-]);
+$models = [
+    getenv('OPENROUTER_MODEL') ?: 'google/gemma-4-31b-it:free',
+    getenv('OPENROUTER_FALLBACK_MODEL') ?: 'google/gemma-4-26b-a4b-it:free',
+    'openrouter/free'
+];
 
 $lastResponse = null;
-$lastHttpCode = 500;
+$lastHttpCode = 503;
 
-// Try API Key query param mode and Bearer token header mode across models
 foreach ($models as $model) {
-    // Mode 1: Direct API Key query parameter (Fastest response path)
-    $urlKey = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=" . urlencode($apiKey);
-    $ch1 = curl_init($urlKey);
-    curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch1, CURLOPT_POST, true);
-    curl_setopt($ch1, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-    curl_setopt($ch1, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch1, CURLOPT_TIMEOUT, 30);
-    curl_setopt($ch1, CURLOPT_CONNECTTIMEOUT, 5);
-    curl_setopt($ch1, CURLOPT_SSL_VERIFYPEER, false);
-
-    $res1 = curl_exec($ch1);
-    $code1 = curl_getinfo($ch1, CURLINFO_HTTP_CODE);
-    curl_close($ch1);
-
-    if ($code1 >= 200 && $code1 < 300) {
-        http_response_code(200);
-        echo $res1;
-        exit();
-    }
-
-    // Mode 2: Authorization: Bearer <token>
-    $urlBearer = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent";
-    $ch2 = curl_init($urlBearer);
-    curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch2, CURLOPT_POST, true);
-    curl_setopt($ch2, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $apiKey
+    $payload = json_encode([
+        "model" => $model,
+        "messages" => [[
+            "role" => "user",
+            "content" => $userContent
+        ]],
+        "temperature" => 0.4,
+        "max_tokens" => 4096
     ]);
-    curl_setopt($ch2, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch2, CURLOPT_TIMEOUT, 30);
-    curl_setopt($ch2, CURLOPT_CONNECTTIMEOUT, 5);
-    curl_setopt($ch2, CURLOPT_SSL_VERIFYPEER, false);
 
-    $res2 = curl_exec($ch2);
-    $code2 = curl_getinfo($ch2, CURLINFO_HTTP_CODE);
-    curl_close($ch2);
+    $ch = curl_init('https://openrouter.ai/api/v1/chat/completions');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_HTTPHEADER => [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . trim($BACKEND_OPENROUTER_API_KEY),
+            'HTTP-Referer: http://localhost',
+            'X-Title: ScholarMate AI'
+        ],
+        CURLOPT_POSTFIELDS => $payload,
+        CURLOPT_TIMEOUT => 60,
+        CURLOPT_CONNECTTIMEOUT => 10,
+        CURLOPT_SSL_VERIFYPEER => true
+    ]);
 
-    if ($code2 >= 200 && $code2 < 300) {
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+
+    if ($httpCode >= 200 && $httpCode < 300 && $response) {
         http_response_code(200);
-        echo $res2;
+        echo $response;
         exit();
     }
 
-    $lastResponse = $res1 ?: $res2;
-    $lastHttpCode = $code1 ?: $code2;
+    $lastResponse = $response ?: json_encode(["error" => $curlError ?: "OpenRouter request failed"]);
+    $lastHttpCode = $httpCode ?: 503;
 }
 
-// Return Google API response if unsuccessful
-http_response_code($lastHttpCode ?: 500);
-echo $lastResponse;
+http_response_code($lastHttpCode);
+echo $lastResponse ?: json_encode(["error" => "AI generation unavailable. Please try again shortly."]);
 ?>
