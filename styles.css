@@ -2149,23 +2149,24 @@ textarea:focus {
     display: none !important;
   }
 
-  /* FIXED BOTTOM NAVIGATION BAR ON MOBILE */
+  /* FIXED FLOATING BOTTOM NAVIGATION BAR ON MOBILE (RAISED 0.5CM / 16PX) */
   .mobile-bottom-nav {
     display: flex !important;
     position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    height: 64px !important;
-    background: rgba(11, 16, 27, 0.95) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border-top: 1px solid var(--border-glass-bright) !important;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+    left: 12px !important;
+    right: 12px !important;
+    height: 62px !important;
+    background: rgba(11, 16, 27, 0.92) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border: 1px solid var(--border-glass-bright) !important;
+    border-radius: 22px !important;
     z-index: 999999 !important;
     justify-content: space-between !important;
     align-items: center !important;
-    padding: 0 2px !important;
-    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.5) !important;
+    padding: 0 6px !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 242, 254, 0.15) !important;
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
   }
@@ -2218,7 +2219,7 @@ textarea:focus {
 
 @media (max-width: 768px) {
   .main-stage {
-    padding: 14px 14px 80px;
+    padding: 14px 14px 95px !important;
   }
 
   .topbar {
@@ -3363,9 +3364,9 @@ body.light-theme .card-back {
 }
 
 body.light-theme .mobile-bottom-nav {
-  background: rgba(255, 255, 255, 0.98) !important;
-  border-top-color: rgba(15, 23, 42, 0.12) !important;
-  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.08) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(15, 23, 42, 0.15) !important;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12), 0 0 15px rgba(0, 242, 254, 0.1) !important;
 }
 
 /* ==========================================================================
