@@ -281,16 +281,20 @@ button {
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
 .input-icon-wrapper>i:not(#togglePasswordIcon),
 .input-icon-wrapper>svg:not(#togglePasswordIcon) {
   position: absolute;
   left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
   width: 18px;
   height: 18px;
-  color: var(--text-subtle);
+  color: var(--cyan-accent);
   pointer-events: none;
+  z-index: 2;
 }
 
 .toggle-password-btn {
@@ -336,8 +340,13 @@ textarea {
   transition: all 0.2s ease;
 }
 
-.input-icon-wrapper input {
-  padding-left: 42px;
+.input-icon-wrapper input,
+.input-icon-wrapper input:not([type="checkbox"]):not([type="radio"]) {
+  padding-left: 44px !important;
+}
+
+.input-icon-wrapper input[type="password"] {
+  padding-right: 44px !important;
 }
 
 input:not([type="checkbox"]):not([type="radio"]):focus,
@@ -2121,7 +2130,31 @@ textarea:focus {
   }
 
   .auth-screen {
-    grid-template-columns: 1fr;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    padding: 24px 16px !important;
+    box-sizing: border-box !important;
+  }
+
+  .auth-panel {
+    width: 100% !important;
+    max-width: 420px !important;
+    padding: 0 !important;
+    margin: auto 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .auth-card {
+    width: 100% !important;
+    padding: 28px 20px !important;
+    box-sizing: border-box !important;
   }
 
   .auth-art {
