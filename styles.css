@@ -159,7 +159,9 @@ h4,
   border-color: rgba(255, 255, 255, 0.15);
 }
 
-.hidden {
+.hidden,
+.hidden[class],
+[hidden] {
   display: none !important;
 }
 
@@ -2129,7 +2131,7 @@ textarea:focus {
     display: none !important;
   }
 
-  .auth-screen {
+  .auth-screen:not(.hidden) {
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
@@ -2138,6 +2140,10 @@ textarea:focus {
     min-height: 100dvh !important;
     padding: 24px 16px !important;
     box-sizing: border-box !important;
+  }
+
+  .auth-screen.hidden {
+    display: none !important;
   }
 
   .auth-panel {
@@ -2577,15 +2583,19 @@ textarea:focus {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(4, 9, 20, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  z-index: 999;
+  background: rgba(4, 9, 20, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 10000005 !important;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
   animation: fadeIn 0.25s ease;
+}
+
+.modal-overlay.hidden {
+  display: none !important;
 }
 
 .modal-card {
