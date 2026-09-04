@@ -322,7 +322,7 @@ button {
   pointer-events: auto !important;
 }
 
-input,
+input:not([type="checkbox"]):not([type="radio"]),
 select,
 textarea {
   width: 100%;
@@ -340,7 +340,7 @@ textarea {
   padding-left: 42px;
 }
 
-input:focus,
+input:not([type="checkbox"]):not([type="radio"]):focus,
 select:focus,
 textarea:focus {
   border-color: var(--cyan-accent);
@@ -3405,12 +3405,20 @@ body.light-theme .mobile-bottom-nav {
 }
 
 .qtype-pill input[type="checkbox"] {
+  -webkit-appearance: checkbox;
+  appearance: checkbox;
   accent-color: var(--cyan-accent);
-  width: 16px;
-  height: 16px;
-  min-width: 16px;
-  flex-shrink: 0;
-  margin: 0;
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  max-width: 16px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  flex-shrink: 0 !important;
   cursor: pointer;
 }
 
@@ -4015,7 +4023,7 @@ body.light-theme .mobile-bottom-nav {
     box-sizing: border-box !important;
   }
 
-  .gen-form-grid input,
+  .gen-form-grid input:not([type="checkbox"]),
   .gen-form-grid select {
     width: 100% !important;
     box-sizing: border-box !important;
