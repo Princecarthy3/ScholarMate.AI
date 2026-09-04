@@ -1097,12 +1097,21 @@ Note: "answer" MUST be the 0-based integer index (0, 1, 2, or 3) of the correct 
    6. UI CONTROLLERS & VIEW RENDERING
    ========================================================================== */
 
+let toastTimer = null;
 function showToast(message) {
   const toast = $('#toast');
   if (!toast) return;
+  
+  if (toastTimer) clearTimeout(toastTimer);
+  
   toast.textContent = message;
+  toast.classList.remove('show');
+  void toast.offsetWidth; // Force browser reflow to re-trigger animation
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3500);
+  
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3500);
 }
 
 function calculateUserLevel(user) {
@@ -2288,7 +2297,7 @@ function setupNavigation() {
   }
 }
 
-let activeChatThreadId = 'thread-main';
+let activeChatThreadId = localStorage.getItem('scholarmate_active_thread') || 'thread-main';
 
 function renderChatThreadsList() {
   const container = $('#chatThreadsList');
@@ -2296,30 +2305,82 @@ function renderChatThreadsList() {
 
   const threads = currentUser?.chatThreads || [];
   if (threads.length === 0) {
-    container.innerHTML = '<p style="color:var(--text-muted);font-size:11px;text-align:center;padding:8px 0;">No past conversation threads yet.</p>';
+    container.innerHTML = '<p style="color:var(--text-muted);font-size:11px;text-align:center;padding:12px 0;">No past conversations yet.</p>';
     return;
   }
 
-  container.innerHTML = threads.map(t => `
-    <div class="chat-thread-item ${t.id === activeChatThreadId ? 'active' : ''}" data-id="${t.id}">
-      <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;">
-        <strong>${t.title || 'Chat Thread'}</strong>
+  container.innerHTML = threads.map(t => {
+    let dateStr = '';
+    if (t.createdAt) {
+      try {
+        const d = new Date(t.createdAt);
+        dateStr = d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      } catch (e) {}
+    }
+    const msgCount = Array.isArray(t.messages) ? t.messages.length : 0;
+    const isActive = t.id === activeChatThreadId;
+
+    return `
+      <div class="chat-thread-item ${isActive ? 'active' : ''}" data-id="${t.id}" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;cursor:pointer;transition:all 0.2s;">
+        <div class="thread-info" style="display:flex;flex-direction:column;gap:2px;overflow:hidden;flex:1;">
+          <strong style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;font-size:12px;">${t.title || 'Study Session'}</strong>
+          <small style="color:var(--text-muted);font-size:10px;">${msgCount} ${msgCount === 1 ? 'msg' : 'msgs'} ${dateStr ? '· ' + dateStr : ''}</small>
+        </div>
+        <button type="button" class="delete-thread-btn" data-id="${t.id}" title="Delete conversation" style="background:none;border:none;color:var(--rose-accent);padding:4px 6px;cursor:pointer;border-radius:6px;opacity:0.75;transition:opacity 0.2s;display:flex;align-items:center;">
+          <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+        </button>
       </div>
-      <small style="color:var(--text-muted);font-size:10px;">${t.messages ? t.messages.length : 0} msgs</small>
-    </div>
-  `).join('');
+    `;
+  }).join('');
+
+  if (window.lucide) window.lucide.createIcons();
 
   container.querySelectorAll('.chat-thread-item').forEach(item => {
-    item.onclick = () => {
+    item.onclick = (e) => {
+      if (e.target.closest('.delete-thread-btn')) return;
       const id = item.dataset.id;
       loadChatThread(id);
       $('#chatHistoryDropdown')?.classList.add('hidden');
     };
   });
+
+  container.querySelectorAll('.delete-thread-btn').forEach(btn => {
+    btn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const id = btn.dataset.id || btn.getAttribute('data-id');
+      if (id) deleteChatThread(id);
+    };
+  });
+}
+
+function deleteChatThread(threadId) {
+  if (!currentUser) return;
+  if (!currentUser.chatThreads) currentUser.chatThreads = [];
+
+  const target = currentUser.chatThreads.find(t => t.id === threadId);
+  const title = target?.title || 'Conversation';
+
+  currentUser.chatThreads = currentUser.chatThreads.filter(t => t.id !== threadId);
+  AuthManager.setCurrentUser(currentUser);
+
+  showToast(`Deleted "${title.slice(0, 20)}${title.length > 20 ? '...' : ''}"`);
+
+  if (activeChatThreadId === threadId) {
+    if (currentUser.chatThreads.length > 0) {
+      loadChatThread(currentUser.chatThreads[0].id);
+    } else {
+      createNewChatThread();
+    }
+  } else {
+    renderChatThreadsList();
+  }
 }
 
 function loadChatThread(threadId) {
   activeChatThreadId = threadId;
+  localStorage.setItem('scholarmate_active_thread', threadId);
+
   const threads = currentUser?.chatThreads || [];
   const targetThread = threads.find(t => t.id === threadId);
 
@@ -2327,8 +2388,10 @@ function loadChatThread(threadId) {
   if (chatLog) chatLog.innerHTML = '';
 
   if (targetThread && Array.isArray(targetThread.messages) && targetThread.messages.length > 0) {
-    targetThread.messages.forEach(m => appendMessage(m.role, m.message, false));
-    showToast(`✓ Loaded "${targetThread.title || 'Chat Thread'}"`);
+    targetThread.messages.forEach(m => {
+      appendMessage(m.role, m.message, false, m.timestamp || m.createdAt);
+    });
+    showToast(`Loaded "${targetThread.title || 'Chat Session'}"`);
   } else {
     appendDefaultWelcomeMessage();
   }
@@ -2337,6 +2400,8 @@ function loadChatThread(threadId) {
 
 function createNewChatThread() {
   activeChatThreadId = 'thread-' + Date.now();
+  localStorage.setItem('scholarmate_active_thread', activeChatThreadId);
+
   const chatLog = $('#chatLog');
   if (chatLog) chatLog.innerHTML = '';
 
@@ -2345,7 +2410,7 @@ function createNewChatThread() {
 
   const newThread = {
     id: activeChatThreadId,
-    title: 'New Study Chat',
+    title: 'New Study Session',
     createdAt: new Date().toISOString(),
     messages: []
   };
@@ -2519,7 +2584,9 @@ function setupTutorChat() {
       if (attachedImageDataUrl) {
         userMsgContent += `<br><img src="${attachedImageDataUrl}" style="max-width:220px;max-height:220px;border-radius:10px;margin-top:8px;display:block;border:1px solid var(--border-glass-bright);" alt="Attached Image" />`;
       }
-      appendMessage('user', userMsgContent);
+      const msgTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const msgIso = new Date().toISOString();
+      appendMessage('user', userMsgContent, true, msgTime);
 
       const currentImageData = attachedImageData ? { ...attachedImageData } : null;
 
@@ -2534,13 +2601,15 @@ function setupTutorChat() {
         if (!thread) {
           thread = {
             id: activeChatThreadId,
-            title: userPrompt.slice(0, 24) + (userPrompt.length > 24 ? '...' : ''),
-            createdAt: new Date().toISOString(),
+            title: userPrompt.slice(0, 26) + (userPrompt.length > 26 ? '...' : ''),
+            createdAt: msgIso,
             messages: []
           };
           currentUser.chatThreads.unshift(thread);
+        } else if (thread.title === 'New Study Session' || thread.title === 'New Study Chat') {
+          thread.title = userPrompt.slice(0, 26) + (userPrompt.length > 26 ? '...' : '');
         }
-        thread.messages.push({ role: 'user', message: userMsgContent });
+        thread.messages.push({ role: 'user', message: userMsgContent, timestamp: msgTime, createdAt: msgIso });
         AuthManager.setCurrentUser(currentUser);
         renderChatThreadsList();
 
@@ -2565,16 +2634,21 @@ function setupTutorChat() {
       try {
         const rawAnswer = await callOpenRouterApi(fullPrompt, { inlineData: currentImageData });
         const cleanAnswerHtml = cleanMarkdown(rawAnswer);
+        const assistantTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         if (loadingArt && loadingArt.querySelector('.bubble-content')) {
           loadingArt.querySelector('.bubble-content').innerHTML = cleanAnswerHtml;
+          const timeSpan = loadingArt.querySelector('.message-time');
+          if (timeSpan) timeSpan.innerHTML = `<i data-lucide="clock" style="width:11px;height:11px;margin-right:3px;"></i>${assistantTime}`;
+          if (window.lucide) window.lucide.createIcons();
         }
 
         if (currentUser) {
           let thread = currentUser.chatThreads?.find(t => t.id === activeChatThreadId);
           if (thread) {
-            thread.messages.push({ role: 'assistant', message: rawAnswer });
+            thread.messages.push({ role: 'assistant', message: rawAnswer, timestamp: assistantTime, createdAt: new Date().toISOString() });
           }
           AuthManager.setCurrentUser(currentUser);
+          renderChatThreadsList();
 
           const supabase = window.getSupabase ? window.getSupabase() : null;
           if (supabase && currentUser.id) {
@@ -2616,14 +2690,28 @@ async function copyMessageText(rawText) {
   }
 }
 
-function appendMessage(role, text, shouldScroll = true) {
+function appendMessage(role, text, shouldScroll = true, timestamp = null) {
   const chatLog = $('#chatLog');
   if (!chatLog) return null;
 
   const article = document.createElement('article');
   article.className = `message ${role}`;
 
-  const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  let displayTime = '';
+  if (timestamp) {
+    if (typeof timestamp === 'string' && (timestamp.includes(':') || timestamp.includes('AM') || timestamp.includes('PM'))) {
+      displayTime = timestamp;
+    } else {
+      try {
+        displayTime = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } catch (e) {
+        displayTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+    }
+  } else {
+    displayTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
   const userInitials = getInitials(currentUser?.name, currentUser?.email);
   const userName = currentUser?.name || 'You';
 
@@ -2632,7 +2720,7 @@ function appendMessage(role, text, shouldScroll = true) {
     <div class="bubble-wrapper">
       <div class="sender-header">
         <span class="sender-label">${role === 'user' ? userName : 'ScholarMate AI Tutor'}</span>
-        <span class="message-time"><i data-lucide="clock" style="width:11px;height:11px;margin-right:3px;"></i>${timeStr}</span>
+        <span class="message-time"><i data-lucide="clock" style="width:11px;height:11px;margin-right:3px;"></i>${displayTime}</span>
       </div>
       <div class="bubble-content">${role === 'user' ? text : cleanMarkdown(text)}</div>
       <button type="button" class="msg-copy-btn" title="Copy message text">
