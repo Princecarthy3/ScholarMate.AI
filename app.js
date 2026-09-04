@@ -44,6 +44,141 @@ function isUuid(str) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 }
 
+/* ==========================================================================
+   MATERIALS PERSISTENCE STORE (IndexedDB + LocalStorage sync)
+   ========================================================================== */
+const MaterialsStore = {
+  dbPromise: null,
+
+  getDB() {
+    if (!this.dbPromise) {
+      this.dbPromise = new Promise((resolve) => {
+        if (!window.indexedDB) {
+          resolve(null);
+          return;
+        }
+        try {
+          const req = indexedDB.open('ScholarMateDB', 1);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('materials')) {
+              const store = db.createObjectStore('materials', { keyPath: 'id' });
+              store.createIndex('email', 'email', { unique: false });
+            }
+          };
+          req.onsuccess = (e) => resolve(e.target.result);
+          req.onerror = () => resolve(null);
+        } catch (err) {
+          resolve(null);
+        }
+      });
+    }
+    return this.dbPromise;
+  },
+
+  async getAllMaterials(userEmail) {
+    if (!userEmail) return [];
+    let items = [];
+
+    // 1. Read from IndexedDB
+    try {
+      const db = await this.getDB();
+      if (db) {
+        items = await new Promise((resolve) => {
+          const tx = db.transaction('materials', 'readonly');
+          const store = tx.objectStore('materials');
+          const idx = store.index('email');
+          const req = idx.getAll(userEmail);
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => resolve([]);
+        });
+      }
+    } catch (e) {
+      console.warn('IndexedDB read warning:', e);
+    }
+
+    // 2. LocalStorage backup
+    try {
+      const lsRaw = localStorage.getItem(`scholarmate_materials_${userEmail}`);
+      if (lsRaw) {
+        const lsItems = JSON.parse(lsRaw) || [];
+        if (lsItems.length > 0) {
+          const map = new Map();
+          items.forEach(i => map.set(i.id, i));
+          lsItems.forEach(i => map.set(i.id, i));
+          items = Array.from(map.values());
+        }
+      }
+    } catch (e) {
+      console.warn('LocalStorage materials read error:', e);
+    }
+
+    return items;
+  },
+
+  async saveMaterial(userEmail, material) {
+    if (!userEmail || !material) return;
+    const record = { ...material, email: userEmail };
+
+    // Save to IndexedDB
+    try {
+      const db = await this.getDB();
+      if (db) {
+        const tx = db.transaction('materials', 'readwrite');
+        tx.objectStore('materials').put(record);
+      }
+    } catch (e) {
+      console.warn('IndexedDB save warning:', e);
+    }
+
+    // Save to LocalStorage backup
+    try {
+      const lsRaw = localStorage.getItem(`scholarmate_materials_${userEmail}`);
+      let lsItems = JSON.parse(lsRaw || '[]');
+      lsItems = lsItems.filter(m => String(m.id).trim() !== String(material.id).trim());
+      lsItems.unshift(record);
+      localStorage.setItem(`scholarmate_materials_${userEmail}`, JSON.stringify(lsItems));
+    } catch (e) {
+      console.warn('LocalStorage save material warning:', e);
+    }
+  },
+
+  async removeMaterial(userEmail, materialId) {
+    if (!userEmail || !materialId) return;
+
+    // Remove from IndexedDB
+    try {
+      const db = await this.getDB();
+      if (db) {
+        const tx = db.transaction('materials', 'readwrite');
+        tx.objectStore('materials').delete(materialId);
+      }
+    } catch (e) {
+      console.warn('IndexedDB remove warning:', e);
+    }
+
+    // Remove from LocalStorage
+    try {
+      const lsRaw = localStorage.getItem(`scholarmate_materials_${userEmail}`);
+      if (lsRaw) {
+        let lsItems = JSON.parse(lsRaw) || [];
+        lsItems = lsItems.filter(m => String(m.id).trim() !== String(materialId).trim());
+        localStorage.setItem(`scholarmate_materials_${userEmail}`, JSON.stringify(lsItems));
+      }
+    } catch (e) {}
+  },
+
+  async syncAllUserMaterials(userEmail, materialsList) {
+    if (!userEmail || !Array.isArray(materialsList)) return;
+    try {
+      localStorage.setItem(`scholarmate_materials_${userEmail}`, JSON.stringify(materialsList));
+      for (const mat of materialsList) {
+        await this.saveMaterial(userEmail, mat);
+      }
+    } catch (e) {}
+  }
+};
+
 const AuthManager = {
   async getCurrentUser(targetUser = null) {
     const supabase = window.getSupabase ? window.getSupabase() : null;
@@ -65,7 +200,16 @@ const AuthManager = {
       if (!email) return null;
       const users = JSON.parse(localStorage.getItem('scholarmate_users') || '{}');
       const localUser = users[email] || null;
-      if (localUser) localUser.initials = getInitials(localUser.name, localUser.email);
+      if (localUser) {
+        localUser.initials = getInitials(localUser.name, localUser.email);
+        const storedMats = await MaterialsStore.getAllMaterials(email);
+        if (storedMats && storedMats.length > 0) {
+          const matMap = new Map();
+          (localUser.materials || []).forEach(m => matMap.set(m.id, m));
+          storedMats.forEach(m => matMap.set(m.id, m));
+          localUser.materials = Array.from(matMap.values());
+        }
+      }
       return localUser;
     }
 
@@ -303,9 +447,28 @@ const AuthManager = {
   },
 
   setCurrentUser(user) {
-    if (!user) return;
+    if (!user || !user.email) return;
     user.initials = getInitials(user.name, user.email);
     currentUser = user;
+
+    // Persist to local storage scholarmate_users
+    try {
+      const users = JSON.parse(localStorage.getItem('scholarmate_users') || '{}');
+      users[user.email] = {
+        ...(users[user.email] || {}),
+        ...user
+      };
+      localStorage.setItem('scholarmate_users', JSON.stringify(users));
+      localStorage.setItem('scholarmate_current_user', user.email);
+    } catch (e) {
+      console.warn('LocalStorage save user error:', e);
+    }
+
+    // Persist materials to MaterialsStore
+    if (Array.isArray(user.materials)) {
+      MaterialsStore.syncAllUserMaterials(user.email, user.materials);
+    }
+
     this.syncProfile(user);
   },
 
@@ -1988,7 +2151,14 @@ async function enterApp(user) {
       }
 
       const { data: materials } = await supabase.from('materials').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-      user.materials = materials || [];
+      const localMats = await MaterialsStore.getAllMaterials(user.email);
+      const matMap = new Map();
+      (materials || []).forEach(m => matMap.set(m.id, m));
+      (localMats || []).forEach(m => matMap.set(m.id, m));
+      user.materials = Array.from(matMap.values());
+      if (user.email && user.materials.length > 0) {
+        MaterialsStore.syncAllUserMaterials(user.email, user.materials);
+      }
 
       const { data: history } = await supabase.from('quiz_history').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
       user.history = (history || []).map(h => ({
@@ -3032,6 +3202,22 @@ async function handleMaterialUpload(file) {
     currentUser.materials = currentUser.materials.filter(m => String(m.id).trim() !== String(newMat.id).trim());
     currentUser.materials.unshift(newMat);
 
+    // Save to IndexedDB and LocalStorage
+    await MaterialsStore.saveMaterial(currentUser.email, newMat);
+
+    // Sync to Supabase if authenticated
+    const supabase = window.getSupabase ? window.getSupabase() : null;
+    if (supabase && currentUser.id && isUuid(currentUser.id)) {
+      supabase.from('materials').upsert({
+        id: newMat.id,
+        user_id: currentUser.id,
+        name: newMat.name,
+        size: newMat.size,
+        content: newMat.content,
+        created_at: newMat.created_at
+      }).catch(err => console.warn('Supabase material insert warning:', err));
+    }
+
     AuthManager.setCurrentUser(currentUser);
     recordUserActivity(currentUser);
 
@@ -3158,6 +3344,17 @@ function renderMaterialsList(materials = []) {
         const deletedMat = materialsList.find(m => String(m.id).trim() === targetId);
 
         user.materials = materialsList.filter(m => String(m.id).trim() !== targetId);
+
+        // Remove from IndexedDB and LocalStorage
+        if (user.email) {
+          MaterialsStore.removeMaterial(user.email, targetId);
+        }
+
+        // Remove from Supabase if authenticated
+        const supabase = window.getSupabase ? window.getSupabase() : null;
+        if (supabase && user.id && isUuid(user.id)) {
+          supabase.from('materials').delete().eq('id', targetId).catch(err => console.warn('Supabase material delete warning:', err));
+        }
 
         if (deletedMat && (attachedFileName === deletedMat.name || user.activeMaterialName === deletedMat.name)) {
           user.activeMaterialName = '';
